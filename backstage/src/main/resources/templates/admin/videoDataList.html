@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+    <head>
+        <meta charset="UTF-8">
+        <title>视频管理</title>
+        <meta name="renderer" content="webkit">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+        <link rel="stylesheet" href="/static/css/font.css">
+        <link rel="stylesheet" href="/static/css/xadmin.css">
+        <script src="/static/lib/layui/layui.js" charset="utf-8"></script>
+        <script type="text/javascript" src="/static/js/xadmin.js"></script>
+        <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+        <script type="text/javascript" src="/static/js/common.js"></script>
+        <!--[if lt IE 9]>
+          <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+          <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+    <style>
+        .layui-table-cell {
+            height: 100%;
+            max-width: 100%;
+        }
+        .layui-table-fixed-r{
+        	display: none
+        }
+    </style>
+    </head>
+    <body>
+
+        <div class="layui-fluid">
+            <div class="layui-row layui-col-space15">
+                <div class="layui-col-md12">
+                    <div class="layui-card">
+                    
+                    <div class="layui-card-body ">
+                            <form class="layui-form layui-col-space5">
+        
+                                <div class="layui-input-inline layui-show-xs-block">
+  									<select id="videoplatform">
+  										<option value="">请选择</option>
+  										<option value="抖音">抖音</option>
+  										<option value="哔哩">哔哩</option>
+                           			 </select>   
+                                </div>
+                                <div class="layui-input-inline layui-show-xs-block">
+                                    <input type="text" id="videodesc" name="videodesc" placeholder="简介" autocomplete="off" class="layui-input"></div>
+                                <div class="layui-input-inline layui-show-xs-block">
+                                <button type="button" class="layui-btn layui-btn-normal search">搜索</button>
+                                <button type="button" class="layui-btn layui-btn-normal initList">重置列表</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="layui-card-body layui-table-body layui-table-main">
+							<table class="layui-hide" id="projectList" lay-filter="projectList"></table>
+                        </div>
+                        <div class="layui-card-body ">
+                            <div class="page" id="page">
+         
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> 
+        
+         <div class="updateData layui-form" style="display: none;padding: 20px;">
+	   		 <input class="optionid" type="hidden">
+			 <div class="layui-inline">
+			    <label class="layui-form-label">来源平台</label>
+			     <div class="layui-input-inline layui-show-xs-block">
+					<select class="videoplatform">
+						   <option  value="其他">其他</option>
+			               <option  value="抖音">抖音</option>
+			               <option  value="B站">B站</option>
+			         </select>   
+			       </div>
+			  </div>
+			
+			  <div class="layui-inline">
+			    <label class="layui-form-label">视频名称</label>
+			    <div class="layui-input-inline">
+			      <input  type="text" name="videoname"  autocomplete="off" class="videoname layui-input">
+			    </div>
+			  </div>
+			  <div class="layui-inline">
+			    <label class="layui-form-label">视频简介</label>
+			    <div class="layui-input-inline">
+			      <input  type="text" name="videodesc"  autocomplete="off" class="videodesc layui-input">
+			    </div>
+			  </div>
+			  <div class="buttondiv" style=" padding-left: 5%; padding-top: 5%; "><button type="button" class="layui-btn">保存信息</button></div>
+	</div>
+        
+    </body>
+	<script type="text/html" th:inline="none" id="barLineTool">
+		<a class="layui-btn layui-btn-xs editData" lay-event="edit">编辑</a>
+		<a class="layui-btn layui-btn layui-btn-xs prevideo" lay-event="prevideo">播放</a>
+  		<a class="layui-btn layui-btn-danger layui-btn-xs delData" lay-event="del">删除</a>
+	</script>     
+	<script type="text/html" th:inline="none" id="imageTpl">
+		<img src="{{d.videocover}}"  width="180px"/>
+	</script>     
+	<script  th:inline="none">
+    var table;
+     $(function(){
+    	 initLayer();
+    	 loadTable();
+    	 search();
+    	 initList();
+    	 updateData();
+     })
+     
+         function updateData(){
+			$('.buttondiv button').click(function(){
+				var option ={
+						id:$('.optionid').val(),
+						videoplatform:$('.videoplatform').val(),
+						videoname:$('.videoname').val(),
+						videodesc:$('.videodesc').val()
+				};
+				layer.load();
+				$.post("/admin/api/updateVideoData",option,function(data,status){
+					console.log(data);
+					if(data.resCode =="000001"){
+						layer.closeAll();
+						layer.alert(data.message,function(){
+							 window.location.reload();
+						})
+					}else{
+						layer.closeAll();
+						layer.alert(data.data);
+					}
+				})
+			})
+		}
+     
+     function initList(){
+    	 $('.initList').click(function(){
+    	     window.location.reload();
+    	 })
+     }
+     function initLayer(){
+    	 layui.use(['laydate','form'], function(){
+             var laydate = layui.laydate;
+             var  form = layui.form;
+
+             form.on('submit(add)',
+                     function(data) {
+                         console.log(data);
+         	           return false;
+           			 });
+
+
+           });
+ 
+     }
+     function search(){
+    		$('.search').click(function(){
+    			 var option = {}
+    			 var  videoplatform = $('#videoplatform').val();
+    			 if(videoplatform != "" ){
+    				 option['videoplatform']= videoplatform;
+    			 }
+    			 var  videodesc = $('#videodesc').val();
+    			 if(videodesc != "" ){
+    				 option['videodesc']= videodesc;
+    			 }
+    	         table.reload('projectList', {
+    	             page: {
+    	                 curr:1
+    	             }, 
+    	 			 method:'post',
+    	 			 url: '/admin/api/findVideoDataList',
+    	             where: option
+    	         })
+    		})
+     }
+     function preVideo(e){
+    	 console.log(e);
+     }
+     function loadTable(){
+    		layui.use(['table','form'], function(){
+    			  table = layui.table;
+    			  var form = layui.form;
+    			  table.render({
+    				id:'projectList',
+    				elem: '#projectList',
+    				height: 700,
+    				method:'post',
+    				url: '/admin/api/findVideoDataList',
+    				limit:15,
+    				request: {
+    				     pageName: 'pageNo',
+    				     limitName: 'pageSize'
+    				},
+    				page: { 
+    			        layout: ['count', 'prev', 'page', 'next', 'limit', 'skip'],
+    			        limits:[15,30,45],
+    			        first: false,
+    			        last: false,
+    			     },
+    			     cols: [[ 
+    			    	 {field: 'id', title: 'ID', width:60},
+    			    	 {field: 'originaladdress', title: '视频原地址', width:180},
+    			    	 {field: 'videoname', title: '视频名称', width:180},
+    			    	 {field: 'videodesc', title: '视频简介', width:180},
+    			    	 {field: 'videoplatform', title: '来源平台', width:80},
+    			    	 {field: 'videocover', title: '视频封面', width:180,templet:function(d){
+    			    		 var html = "<div><image class='cover' src='"+d.videocover+"'></image></div>";
+    			    		 return html;
+    			    	 }},
+    			    	 {field: 'videoaddr', title: '视频真实地址', width:180},
+    			    	 {field: 'createtime', title: '下载时间', width:180},
+    			    	 {fixed: 'right', title:'操作',  minWidth: 180, toolbar: '#barLineTool'}
+    			     ]],
+    			     title: '媒体表'	,
+    			     parseData:function(res){
+    			    	 console.log(res);
+    			    	 return {
+    			             "code": 0, 
+    			             "msg": "",
+    			             "count": res.record.totalElements,
+    			             "data": res.record.content
+    			         };
+    			     }
+    			  });
+    			  
+    			  
+    			  //监听行工具事件
+    			  table.on('tool(projectList)', function(obj){
+    			    var data = obj.data;
+    			    console.log(obj)
+    			    if(obj.event === 'del'){
+      			      layer.confirm("删除后下载的资源将一并删除,是否删除", function(index){
+      			        //调用接口删除
+      			        var id =obj.data.id;
+      			        $.get("/admin/api/deleteVideoData?id="+id,function(res){
+      			        	if(res.resCode =="000001"){
+      			        		layer.msg(res.message)
+      			        		setTimeout(function(){
+      								 window.location.reload();
+      							},1500)
+      			        	}else{
+      			        		layer.alert(res.message);
+      			        	}
+      			        })
+      			        layer.close(index);
+      			      });
+    			    }
+    			   	if(obj.event === 'edit'){
+							//updateData
+    			   		$('.optionid').val(obj.data.id);
+    			   		$(".videoplatform option[value=" + obj.data.videoplatform + "]").attr('selected', "selected"); 
+    			   		$('.videoname').val(obj.data.videoname);
+    			   		$('.videodesc').val(obj.data.videodesc);
+    			   		form.render('select');
+    			   		layer.open({
+      			   		  type: 1,
+      			   		  skin: 'layui-layer-rim', 
+      			   		  area: ['520px', '540px'], 
+      			   		  content: $('.updateData')
+      			   		});
+    			   	}
+    			   	
+    			   	if(obj.event === 'prevideo'){
+       			   		layer.open({
+        			   		  type: 1,
+        			   		  skin: 'layui-layer-rim', 
+        			   		  area: ['800px', '520px'], 
+        			   		  content: "<video src='"+obj.data.videounrealaddr+"' height='100%' width='100%' controls='controls'>"
+        			   	});
+			  	 	}
+    			  });
+    			  
+    			  
+    			});
+    	}
+
+    </script>
+</html>

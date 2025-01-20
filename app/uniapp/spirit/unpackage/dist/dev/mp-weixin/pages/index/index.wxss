@@ -1,0 +1,26 @@
+
+.content{
+	width: 100%;
+	text-align: center;
+}
+.url{
+	margin-top: 5%;
+	border: 1px solid #c0b9b9;
+	border-radius: 10px;
+	margin-left: 12%
+}
+.uni-input{
+	margin-top: 5%;
+	border: 1px solid #c0b9b9;
+	width: 80%;
+	margin-left: 12%;
+	border-radius: 10px;
+}
+button{
+	margin-top: 5%;
+	border: 1px solid #c0b9b9;
+	width: 80%;
+	margin-left: 12%;
+	border-radius: 10px;
+}
+
